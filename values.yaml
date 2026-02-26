@@ -1,0 +1,63 @@
+# Qualys Containerized Scanner Appliance (QCSA) Configuration
+
+# -- Image configuration --
+image:
+  repository: qualys/qcsa
+  tag: "latest"
+  pullPolicy: IfNotPresent
+
+imagePullSecrets: []
+
+# -- Qualys configuration --
+# REQUIRED: Personalization code from Qualys platform
+# Generate this in Qualys VM > Scans > Appliances > New > Containerized Scanner
+personalizationCode: ""
+
+# Use an existing secret instead of creating one
+existingSecret: ""
+existingSecretKey: "PERSONALIZATION_CODE"
+
+# REQUIRED: Qualys platform URL (find in Qualys UI: Help > About > SOC endpoint)
+# Examples: https://qualysguard.qualys.com (US1), https://qualysguard.qg2.apps.qualys.com (US2)
+qualysUrl: ""
+
+# Scanner name (optional - will use pod name if not set)
+scannerName: ""
+
+# -- Proxy --
+# If proxy is required to connect to Qualys Cloud, set enabled to true
+proxy:
+  enabled: false
+  proxyvalue:   #"<proxy FQDN or IP address>:<port#>"
+  proxycertpath:  #"<proxy certificate path>"
+
+# -- Security --
+securityContext:
+  privileged: true
+
+podSecurityContext: {}
+
+# -- Resources --
+resources:
+  limits:
+    cpu: "2"
+    memory: 4Gi
+  requests:
+    cpu: "500m"
+    memory: 2Gi
+
+# -- Scheduling --
+tolerations: []
+nodeSelector: {}
+affinity: {}
+
+# -- Additional --
+extraEnv: []
+# - name: DISREGARD_PID_LIMIT
+#   value: "yes"
+
+podAnnotations: {}
+podLabels: {}
+nameOverride: ""
+fullnameOverride: ""
+replicaCount: 1

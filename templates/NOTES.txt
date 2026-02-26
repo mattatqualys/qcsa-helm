@@ -1,0 +1,28 @@
+Qualys Containerized Scanner Appliance (QCSA) has been deployed!
+
+Release: {{ .Release.Name }}
+Namespace: {{ .Release.Namespace }}
+
+To check the status of your scanner:
+
+  kubectl get pods -l "app.kubernetes.io/name={{ include "qcsa.name" . }},app.kubernetes.io/instance={{ .Release.Name }}" -n {{ .Release.Namespace }}
+
+To view the scanner logs:
+
+  kubectl logs -l "app.kubernetes.io/name={{ include "qcsa.name" . }},app.kubernetes.io/instance={{ .Release.Name }}" -n {{ .Release.Namespace }} -f
+
+The scanner should register with your Qualys subscription automatically.
+Check the Qualys VM console under Scans > Appliances to verify.
+
+{{- if not .Values.personalizationCode }}
+{{- if not .Values.existingSecret }}
+
+WARNING: No personalization code was provided!
+The scanner will not be able to register with Qualys.
+
+Please update your release with a valid personalization code:
+
+  helm upgrade {{ .Release.Name }} ./qcsa_helm --set personalizationCode=YOUR_CODE
+
+{{- end }}
+{{- end }}

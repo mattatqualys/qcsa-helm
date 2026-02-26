@@ -1,0 +1,14 @@
+apiVersion: v2
+name: qcsa
+description: Qualys Containerized Scanner Appliance (QCSA) Helm Chart
+type: application
+version: 0.1.0
+appVersion: "latest"
+keywords:
+  - qualys
+  - scanner
+  - vulnerability
+  - security
+maintainers:
+  - name: Your Name
+    email: your.email@example.com

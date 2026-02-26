@@ -1,0 +1,92 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "qcsa.fullname" . }}
+  labels:
+    {{- include "qcsa.labels" . | nindent 4 }}
+spec:
+  replicas: {{ .Values.replicaCount }}
+  selector:
+    matchLabels:
+      {{- include "qcsa.selectorLabels" . | nindent 6 }}
+  template:
+    metadata:
+      {{- with .Values.podAnnotations }}
+      annotations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      labels:
+        {{- include "qcsa.labels" . | nindent 8 }}
+        {{- with .Values.podLabels }}
+        {{- toYaml . | nindent 8 }}
+        {{- end }}
+    spec:
+      {{- with .Values.imagePullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.podSecurityContext }}
+      securityContext:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      containers:
+        - name: {{ .Chart.Name }}
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          {{- with .Values.securityContext }}
+          securityContext:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+          env:
+            - name: PERSONALIZATION_CODE
+              valueFrom:
+                secretKeyRef:
+                  name: {{ include "qcsa.secretName" . }}
+                  key: {{ .Values.existingSecretKey | default "PERSONALIZATION_CODE" }}
+            {{- if .Values.qualysUrl }}
+            - name: QUALYS_URL
+              value: {{ .Values.qualysUrl | quote }}
+            {{- end }}
+            {{- if .Values.scannerName }}
+            - name: SCANNER_NAME
+              value: {{ .Values.scannerName | quote }}
+            {{- end }}
+            {{- if .Values.proxy.enabled }}
+            {{- if .Values.proxy.proxyvalue }}
+            - name: PROXY_URL
+              value: {{ .Values.proxy.proxyvalue | quote }}
+            {{- end }}
+            {{- if .Values.proxy.proxycertpath }}
+            - name: PROXY_CERT_PATH
+              value: {{ .Values.proxy.proxycertpath | quote }}
+            {{- end }}
+            {{- end }}
+            {{- with .Values.extraEnv }}
+            {{- toYaml . | nindent 12 }}
+            {{- end }}
+          volumeMounts:
+            - name: qualys-shared
+              mountPath: /usr/local/qualys
+            - name: qualys-private
+              mountPath: /usr/local/qualys/admin/etc
+          {{- with .Values.resources }}
+          resources:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+      volumes:
+        - name: qualys-shared
+          emptyDir: {}
+        - name: qualys-private
+          emptyDir: {}
+      {{- with .Values.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
